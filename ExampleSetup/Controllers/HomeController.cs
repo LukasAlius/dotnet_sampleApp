@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using System.Web.SessionState;
 using Newtonsoft.Json.Linq;
 
 
@@ -13,7 +14,8 @@ namespace ExampleSetup.Controllers
     public class HomeController : Controller
     {
         private const string IndividualsUrl ="https://api-beta.direct.id:444/v1/individuals";
-        private static string raw_json;
+        private static string jsonIndividualsDetails;
+        private static string jsonIndividualSummary;
 
         private static string accessToken;
 
@@ -103,18 +105,28 @@ namespace ExampleSetup.Controllers
             }
 
             var userSessionResponse = await response.Content.ReadAsAsync<UserSessionResponse>();
-            raw_json = await httpClient.GetStringAsync("https://api-beta.direct.id:444/v1/individual/5388f1dd436e46698007b79650679023");
-            //raw_json = await httpClient.GetStringAsync(IndividualsUrl);
-            //accessToken = authenticationToken;
+
+            //getting a Jsons strings
+            jsonIndividualSummary = await httpClient.GetStringAsync(IndividualsUrl);
+            jsonIndividualsDetails = await httpClient.GetStringAsync("https://api-beta.direct.id:444/v1/individual/5388f1dd436e46698007b79650679023");
             return userSessionResponse.token;
         }
+
+        /*public static async Task<string> ApiTask(CredentialsModel credentials)
+        {
+            var userSessionToken = await AcquireUserSessionToken(
+                AcquireOAuthAccessToken(credentials),
+                new Uri(credentials.API));
+
+            return View("API", populateData_IndividualDetails(jsonIndividualSummary) as IEnumerable<IndividualsSummary>);
+        }*/
 
         /// <summary>
         /// Getting a Individuals Summary
         /// </summary>
         public ActionResult API()
         {
-            return View(populateData(raw_json));
+            return View(populateData(jsonIndividualSummary));
         }
 
         /// <summary>
@@ -122,7 +134,7 @@ namespace ExampleSetup.Controllers
         /// </summary>
         public ActionResult API_details()
         {
-            return View(populateData_IndividualDetails(raw_json));
+            return View(populateData_IndividualDetails(jsonIndividualsDetails));
         }
 
         private static List<IndividualsSummary> populateData(string json)
@@ -147,8 +159,7 @@ namespace ExampleSetup.Controllers
         private static List<IndividualDetails> populateData_IndividualDetails(string json)
         {
             dynamic parsedJson = JObject.Parse(json);
-            var individualJson = parsedJson.Individual;
-            string reference = individualJson["Reference"];
+            string reference = parsedJson.Individual["Reference"];
             var providers = parsedJson.Individual.Global.Bank.Providers[0];
             string provider = providers["Provider"];
             var accountsJson = providers.Accounts;
@@ -156,6 +167,14 @@ namespace ExampleSetup.Controllers
             var individual = new List<IndividualDetails>();
             var accounts = new List<AccountDetails>();
 
+            GetAccounts(accountsJson, accounts);
+
+            individual.Add(new IndividualDetails(reference, provider, accounts));
+            return individual;
+        }
+
+        private static void GetAccounts(dynamic accountsJson, List<AccountDetails> accounts)
+        {
             foreach (var item in accountsJson)
             {
                 string accountName = (string) item["AccountName"];
@@ -163,29 +182,27 @@ namespace ExampleSetup.Controllers
                 string accountType = (string) item["AccountType"];
                 string activityAvailableFrom = (string) item["ActivityAvailableFrom"];
                 string accountNumber = (string) item["AccountNumber"];
-                string sortCode = (string)item["SortCode"];
-                string balance = (string)item["Balance"];
-                string balanceFormatted = (string)item["BalanceFormatted"];
-                string currencyCode = (string)item["CurrencyCode"];
-                string verifiedOn = (string)item["VerifiedOn"];
+                string sortCode = (string) item["SortCode"];
+                string balance = (string) item["Balance"];
+                string balanceFormatted = (string) item["BalanceFormatted"];
+                string currencyCode = (string) item["CurrencyCode"];
+                string verifiedOn = (string) item["VerifiedOn"];
 
                 var transactions_json = item["Transactions"];
                 var transactions = new List<Transaction>();
                 foreach (var details in transactions_json)
                 {
                     string date = (string) details["Date"];
-                    string description = (string)details["Description"];
-                    string amount = (string)details["Amount"];
-                    string type = (string)details["Type"];
+                    string description = (string) details["Description"];
+                    string amount = (string) details["Amount"];
+                    string type = (string) details["Type"];
                     transactions.Add(new Transaction(date, description, amount, type));
                 }
 
-                var accountDetails = new AccountDetails(accountName, accountHolder, accountType, activityAvailableFrom, accountNumber, sortCode, balance, balanceFormatted, currencyCode, verifiedOn, transactions);
+                var accountDetails = new AccountDetails(accountName, accountHolder, accountType, activityAvailableFrom,
+                    accountNumber, sortCode, balance, balanceFormatted, currencyCode, verifiedOn, transactions);
                 accounts.Add(accountDetails);
             }
-
-            individual.Add(new IndividualDetails(reference, provider, accounts));
-            return individual;
         }
     }
 
