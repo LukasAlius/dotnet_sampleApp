@@ -123,10 +123,10 @@
     <Content Include="Views\Home\Widget.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Home\API.cshtml" />
+    <Content Include="Views\Home\IndividualsSummary.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Home\API_details.cshtml" />
+    <Content Include="Views\Home\IndividualDetails.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

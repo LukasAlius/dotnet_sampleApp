@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using System.Web.SessionState;
 using Newtonsoft.Json.Linq;
 
 
@@ -13,11 +12,12 @@ namespace ExampleSetup.Controllers
 {
     public class HomeController : Controller
     {
-        private const string IndividualsUrl ="https://api-beta.direct.id:444/v1/individuals";
-        private static string jsonIndividualsDetails;
-        private static string jsonIndividualSummary;
+        private const string SummaryUrl ="https://api-beta.direct.id:444/v1/individuals";
+        private const string DetailsUrl = "https://api-beta.direct.id:444/v1/individual/";
+        private static string _jsonIndividualsDetails;
+        private static string _jsonIndividualSummary;
 
-        private static string accessToken;
+        private string _reference;
 
         /// <summary>
         /// Presents a form for populating the credentials required to 
@@ -38,6 +38,12 @@ namespace ExampleSetup.Controllers
             var userSessionToken = await AcquireUserSessionToken(
                 AcquireOAuthAccessToken(credentials),
                 new Uri(credentials.API));
+
+            _reference = "5388f1dd436e46698007b79650679023";
+
+            // Getting a data from a API
+            _jsonIndividualSummary = await getJson(credentials, SummaryUrl);
+            _jsonIndividualsDetails = await getJson(credentials, DetailsUrl + _reference);
 
             return View("Widget", new WidgetModel(userSessionToken, credentials.FullCDNPath));
         }
@@ -105,39 +111,42 @@ namespace ExampleSetup.Controllers
             }
 
             var userSessionResponse = await response.Content.ReadAsAsync<UserSessionResponse>();
-
-            //getting a Jsons strings
-            jsonIndividualSummary = await httpClient.GetStringAsync(IndividualsUrl);
-            jsonIndividualsDetails = await httpClient.GetStringAsync("https://api-beta.direct.id:444/v1/individual/5388f1dd436e46698007b79650679023");
             return userSessionResponse.token;
         }
 
-        /*public static async Task<string> ApiTask(CredentialsModel credentials)
-        {
-            var userSessionToken = await AcquireUserSessionToken(
-                AcquireOAuthAccessToken(credentials),
-                new Uri(credentials.API));
-
-            return View("API", populateData_IndividualDetails(jsonIndividualSummary) as IEnumerable<IndividualsSummary>);
-        }*/
-
         /// <summary>
-        /// Getting a Individuals Summary
+        /// Load a Individuals Summary page
         /// </summary>
-        public ActionResult API()
+        public ActionResult IndividualsSummary()
         {
-            return View(populateData(jsonIndividualSummary));
+            return View(PopulateData(_jsonIndividualSummary));
         }
 
         /// <summary>
-        /// Getting a Individuals Details
+        /// Load a Individuals Details page
         /// </summary>
-        public ActionResult API_details()
+        public ActionResult IndividualDetails()
         {
-            return View(populateData_IndividualDetails(jsonIndividualsDetails));
+            return View(PopulateDataIndividualDetails(_jsonIndividualsDetails));
         }
 
-        private static List<IndividualsSummary> populateData(string json)
+        /// <summary>
+        /// Getting Json using authorization token
+        /// </summary>
+        private async Task<string> getJson(CredentialsModel credentials, string url)
+        {
+            // Getting authorization token
+            var authenticationToken = AcquireOAuthAccessToken(credentials);
+
+            // Connecting using a authentication token (OAuthorization)
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationToken);
+            string rawJson = await httpClient.GetStringAsync(url);
+
+            return rawJson;
+        }
+
+        private static List<IndividualsSummary> PopulateData(string json)
         {
             var parsedJson = JObject.Parse(json);
             List<IndividualsSummary> individuals = new List<IndividualsSummary>();
@@ -145,18 +154,18 @@ namespace ExampleSetup.Controllers
             foreach (var item in parsedJson["Individuals"])
             {
                 string reference = (string)item["Reference"];
-                string timestamp = (string)item["Timestamp"]; ;
-                string name = (string)item["Name"]; ;
-                string emailAddress = (string)item["EmailAddress"]; ;
-                string userID = (string)item["UserID"]; ;
-                IndividualsSummary individual = new IndividualsSummary(reference, timestamp, name, emailAddress, userID);
+                string timestamp = (string)item["Timestamp"];
+                string name = (string)item["Name"];
+                string emailAddress = (string)item["EmailAddress"];
+                string userId = (string)item["UserID"];
+                IndividualsSummary individual = new IndividualsSummary(reference, timestamp, name, emailAddress, userId);
                 individuals.Add(individual);
             }
 
             return individuals;
         }
 
-        private static List<IndividualDetails> populateData_IndividualDetails(string json)
+        private static List<IndividualDetails> PopulateDataIndividualDetails(string json)
         {
             dynamic parsedJson = JObject.Parse(json);
             string reference = parsedJson.Individual["Reference"];
@@ -188,9 +197,8 @@ namespace ExampleSetup.Controllers
                 string currencyCode = (string) item["CurrencyCode"];
                 string verifiedOn = (string) item["VerifiedOn"];
 
-                var transactions_json = item["Transactions"];
                 var transactions = new List<Transaction>();
-                foreach (var details in transactions_json)
+                foreach (var details in item["Transactions"])
                 {
                     string date = (string) details["Date"];
                     string description = (string) details["Description"];
