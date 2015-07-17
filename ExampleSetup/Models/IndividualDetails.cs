@@ -13,10 +13,6 @@ namespace ExampleSetup.Models
 
         public List<AccountDetails> Accounts { get; set; }
 
-        public string EmailAddress { get; set; }
-
-        public string UserID { get; set; }
-
         public IndividualDetails(string reference, string timestamp, List<AccountDetails> accounts)
         {
             this.Reference = reference;

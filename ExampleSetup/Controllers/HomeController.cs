@@ -114,29 +114,14 @@ namespace ExampleSetup.Controllers
         /// </summary>
         public ActionResult API()
         {
-            //Using authenticationToken get json string
-            //Parse it
-            //Display it in View
-
-            /*var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
-            raw_json = await httpClient.GetStringAsync(IndividualsUrl);*/
-
             return View(populateData(raw_json));
         }
 
+        /// <summary>
+        /// Getting a Individuals Details
+        /// </summary>
         public ActionResult API_details()
         {
-            //Using authenticationToken get json string
-            //Parse it
-            //Display it in View
-
-            /*var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
-            raw_json = await httpClient.GetStringAsync(IndividualsUrl);*/
-
             return View(populateData_IndividualDetails(raw_json));
         }
 
@@ -159,16 +144,19 @@ namespace ExampleSetup.Controllers
             return individuals;
         }
 
-        private static List<AccountDetails> populateData_IndividualDetails(string json)
+        private static List<IndividualDetails> populateData_IndividualDetails(string json)
         {
             dynamic parsedJson = JObject.Parse(json);
-            var reference = parsedJson.Individual["Reference"];
+            var individualJson = parsedJson.Individual;
+            string reference = individualJson["Reference"];
             var providers = parsedJson.Individual.Global.Bank.Providers[0];
-            var accounts_json = providers.Accounts;
+            string provider = providers["Provider"];
+            var accountsJson = providers.Accounts;
 
+            var individual = new List<IndividualDetails>();
             var accounts = new List<AccountDetails>();
 
-            foreach (var item in accounts_json)
+            foreach (var item in accountsJson)
             {
                 string accountName = (string) item["AccountName"];
                 string accountHolder = (string) item["AccountHolder"];
@@ -195,7 +183,9 @@ namespace ExampleSetup.Controllers
                 var accountDetails = new AccountDetails(accountName, accountHolder, accountType, activityAvailableFrom, accountNumber, sortCode, balance, balanceFormatted, currencyCode, verifiedOn, transactions);
                 accounts.Add(accountDetails);
             }
-            return accounts;
+
+            individual.Add(new IndividualDetails(reference, provider, accounts));
+            return individual;
         }
     }
 

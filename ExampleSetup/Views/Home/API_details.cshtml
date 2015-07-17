@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ExampleSetup.Models.AccountDetails>
+﻿@model IEnumerable<ExampleSetup.Models.IndividualDetails>
 <!DOCTYPE html>
 
 <html>
@@ -79,78 +79,99 @@
             </header>
             <div class="row">
                 <div class="col-xs-10 col-xs-offset-1 col-sm-10 col-sm-offset-1">
-
-                    @foreach (ExampleSetup.Models.AccountDetails item in Model)
+                    @foreach (ExampleSetup.Models.IndividualDetails individual in Model)
                     {
-                        <h1>Account Details:</h1>
-                        <br />
+                        <h1>Individual Details:</h1>
+                        <br/>
                         <table class="table table-hover">
                             <tr>
-                                <td>AccountName</td>
-                                <td>@item.AccountName</td>
+                                <td>Reference</td>
+                                <td>@individual.Reference</td>
                             </tr>
                             <tr>
-                                <td>AccountHolder</td>
-                                <td>@item.AccountHolder</td>
-                            </tr>
-                            <tr>
-                                <td>AccountType</td>
-                                <td>@item.AccountType</td>
-                            </tr>
-                            <tr>
-                                <td>ActivityAvailableFrom</td>
-                                <td>@item.ActivityAvailableFrom</td>
-                            </tr>
-                            <tr>
-                                <td>SortCode</td>
-                                <td>@item.SortCode</td>
-                            </tr>
-                            <tr>
-                                <td>Balance</td>
-                                <td>@item.Balance</td>
-                            </tr>
-                            <tr>
-                                <td>BalanceFormatted</td>
-                                <td>@item.BalanceFormatted</td>
-                            </tr>
-                            <tr>
-                                <td>CurrencyCode</td>
-                                <td>@item.CurrencyCode</td>
-                            </tr>
-                            <tr>
-                                <td>VerifiedOn</td>
-                                <td>@item.VerifiedOn</td>
+                                <td>Provider</td>
+                                <td>@individual.Provider</td>
                             </tr>
                         </table>
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        foreach (ExampleSetup.Models.AccountDetails account in individual.Accounts)
+                        {
+                             <h1>Account Details:</h1>
+                             <br/>
+                             <table class="table table-hover">
+                                 <tr>
+                                     <td>AccountName</td>
+                                     <td>@account.AccountName</td>
+                                 </tr>
+                                 <tr>
+                                     <td>AccountHolder</td>
+                                     <td>@account.AccountHolder</td>
+                                 </tr>
+                                 <tr>
+                                     <td>AccountType</td>
+                                     <td>@account.AccountType</td>
+                                 </tr>
+                                 <tr>
+                                     <td>ActivityAvailableFrom</td>
+                                     <td>@account.ActivityAvailableFrom</td>
+                                 </tr>
+                                 <tr>
+                                     <td>SortCode</td>
+                                     <td>@account.SortCode</td>
+                                 </tr>
+                                 <tr>
+                                     <td>Balance</td>
+                                     <td>@account.Balance</td>
+                                 </tr>
+                                 <tr>
+                                     <td>BalanceFormatted</td>
+                                     <td>@account.BalanceFormatted</td>
+                                 </tr>
+                                 <tr>
+                                     <td>CurrencyCode</td>
+                                     <td>@account.CurrencyCode</td>
+                                 </tr>
+                                 <tr>
+                                     <td>VerifiedOn</td>
+                                     <td>@account.VerifiedOn</td>
+                                 </tr>
+                             </table>
 
-                        <h1>Transactions:</h1>
-                        <br />
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <td>Date</td>
-                                    <td>Description</td>
-                                    <td>Amount</td>
-                                    <td>Type</td>
-                                </tr>
-                            </thead>
-                            @foreach (ExampleSetup.Models.Transaction transaction in item.Transactions)
-                            {
-                                <tr>
-                                    <td>@transaction.Date</td>
-                                    <td>@transaction.Description</td>
-                                    <td>@transaction.Amount</td>
-                                    <td>@transaction.Type</td>
-                                </tr>
-                            }
-                        </table>
-                        <br/>
-                        <br/>
-                        <br/>
-                        <br/>
-                        <br/>
-                        <br/>
-                        <br/>
+                             <h1>Transactions:</h1>
+                             <br/>
+                             <table class="table table-hover">
+                                 <thead>
+                                 <tr>
+                                     <td>Date</td>
+                                     <td>Description</td>
+                                     <td>Amount</td>
+                                     <td>Type</td>
+                                 </tr>
+                                 </thead>
+                                 @foreach (ExampleSetup.Models.Transaction transaction in account.Transactions)
+                                 {
+                                     <tr>
+                                         <td>@transaction.Date</td>
+                                         <td>@transaction.Description</td>
+                                         <td>@transaction.Amount</td>
+                                         <td>@transaction.Type</td>
+                                     </tr>
+                                 }
+                             </table>
+                             <br/>
+                             <br/>
+                             <br/>
+                             <br/>
+                             <br/>
+                             <br/>
+                             <br/>
+                         }
                     }
                 </div>
             </div>
