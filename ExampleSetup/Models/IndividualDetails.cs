@@ -13,10 +13,10 @@ namespace ExampleSetup.Models
 
         public List<AccountDetails> Accounts { get; set; }
 
-        public IndividualDetails(string reference, string timestamp, List<AccountDetails> accounts)
+        public IndividualDetails(string reference, string provider, List<AccountDetails> accounts)
         {
             this.Reference = reference;
-            this.Provider = timestamp;
+            this.Provider = provider;
             this.Accounts = accounts;
         }
     }

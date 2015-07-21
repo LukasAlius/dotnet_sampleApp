@@ -16,7 +16,7 @@ namespace ExampleSetup.Controllers
         private const string SummaryUrl ="https://api-beta.direct.id:444/v1/individuals";
         private const string DetailsUrl = "https://api-beta.direct.id:444/v1/individual/";
         private static string _jsonIndividualsDetails;
-        private static string _jsonIndividualSummary;
+        private static string _jsonIndividualsSummary;
 
         private string _reference;
 
@@ -42,8 +42,7 @@ namespace ExampleSetup.Controllers
 
             _reference = "5388f1dd436e46698007b79650679023";
 
-            // Getting a data from a API
-            _jsonIndividualSummary = await getJson(credentials, SummaryUrl);
+            _jsonIndividualsSummary = await getJson(credentials, SummaryUrl);
             _jsonIndividualsDetails = await getJson(credentials, DetailsUrl + _reference);
 
             return View("Widget", new WidgetModel(userSessionToken, credentials.FullCDNPath));
@@ -120,7 +119,7 @@ namespace ExampleSetup.Controllers
         /// </summary>
         public ActionResult IndividualsSummary()
         {
-            return View(PopulateData(_jsonIndividualSummary));
+            return View(PopulateData(_jsonIndividualsSummary));
         }
 
         /// <summary>
