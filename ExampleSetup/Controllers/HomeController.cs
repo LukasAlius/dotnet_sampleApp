@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using System.Web.WebSockets;
 using Newtonsoft.Json.Linq;
 
 
@@ -17,8 +16,7 @@ namespace ExampleSetup.Controllers
         private const string IndividualDetailsUrl = "https://api-beta.direct.id:444/v1/individual/";
         private static string _jsonIndividualsDetails;
         private static string _jsonIndividualsSummary;
-
-        private string _reference = "5388f1dd436e46698007b79650679023";
+        private const string Reference = "5388f1dd436e46698007b79650679023";
 
         /// <summary>
         /// Presents a form for populating the credentials required to 
@@ -41,9 +39,25 @@ namespace ExampleSetup.Controllers
                 new Uri(credentials.API));
 
             _jsonIndividualsSummary = await getJson(credentials, IndividualSummaryUrl);
-            _jsonIndividualsDetails = await getJson(credentials, IndividualDetailsUrl + _reference);
+            _jsonIndividualsDetails = await getJson(credentials, IndividualDetailsUrl + Reference);
 
             return View("Widget", new WidgetModel(userSessionToken, credentials.FullCDNPath));
+        }
+
+        /// <summary>
+        /// Load a Individuals Summary page
+        /// </summary>
+        public ActionResult IndividualsSummary()
+        {
+            return View(PopulateIndividualsSummaryModel(_jsonIndividualsSummary));
+        }
+
+        /// <summary>
+        /// Load a Individuals Details page
+        /// </summary>
+        public ActionResult IndividualDetails()
+        {
+            return View(PopulateIndividualDetailsModel(_jsonIndividualsDetails));
         }
 
         /// <summary>
@@ -113,22 +127,6 @@ namespace ExampleSetup.Controllers
         }
 
         /// <summary>
-        /// Load a Individuals Summary page
-        /// </summary>
-        public ActionResult IndividualsSummary()
-        {
-            return View(PopulateIndividualsSummaryModel(_jsonIndividualsSummary));
-        }
-
-        /// <summary>
-        /// Load a Individuals Details page
-        /// </summary>
-        public ActionResult IndividualDetails()
-        {
-            return View(PopulateDataIndividualDetailsModel(_jsonIndividualsDetails));
-        }
-
-        /// <summary>
         /// Getting Json using authorization token
         /// </summary>
         private async Task<string> getJson(CredentialsModel credentials, string url)
@@ -163,7 +161,7 @@ namespace ExampleSetup.Controllers
             return individuals;
         }
 
-        private static List<IndividualDetails> PopulateDataIndividualDetailsModel(string json)
+        private static List<IndividualDetails> PopulateIndividualDetailsModel(string json)
         {
             dynamic parsedJson = JObject.Parse(json);
             string reference = parsedJson.Individual["Reference"];
