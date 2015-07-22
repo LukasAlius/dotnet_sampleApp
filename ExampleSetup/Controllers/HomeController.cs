@@ -13,12 +13,12 @@ namespace ExampleSetup.Controllers
 {
     public class HomeController : Controller
     {
-        private const string SummaryUrl ="https://api-beta.direct.id:444/v1/individuals";
-        private const string DetailsUrl = "https://api-beta.direct.id:444/v1/individual/";
+        private const string IndividualSummaryUrl ="https://api-beta.direct.id:444/v1/individuals";
+        private const string IndividualDetailsUrl = "https://api-beta.direct.id:444/v1/individual/";
         private static string _jsonIndividualsDetails;
         private static string _jsonIndividualsSummary;
 
-        private string _reference;
+        private string _reference = "5388f1dd436e46698007b79650679023";
 
         /// <summary>
         /// Presents a form for populating the credentials required to 
@@ -40,10 +40,8 @@ namespace ExampleSetup.Controllers
                 AcquireOAuthAccessToken(credentials),
                 new Uri(credentials.API));
 
-            _reference = "5388f1dd436e46698007b79650679023";
-
-            _jsonIndividualsSummary = await getJson(credentials, SummaryUrl);
-            _jsonIndividualsDetails = await getJson(credentials, DetailsUrl + _reference);
+            _jsonIndividualsSummary = await getJson(credentials, IndividualSummaryUrl);
+            _jsonIndividualsDetails = await getJson(credentials, IndividualDetailsUrl + _reference);
 
             return View("Widget", new WidgetModel(userSessionToken, credentials.FullCDNPath));
         }
@@ -119,7 +117,7 @@ namespace ExampleSetup.Controllers
         /// </summary>
         public ActionResult IndividualsSummary()
         {
-            return View(PopulateData(_jsonIndividualsSummary));
+            return View(PopulateIndividualsSummaryModel(_jsonIndividualsSummary));
         }
 
         /// <summary>
@@ -127,7 +125,7 @@ namespace ExampleSetup.Controllers
         /// </summary>
         public ActionResult IndividualDetails()
         {
-            return View(PopulateDataIndividualDetails(_jsonIndividualsDetails));
+            return View(PopulateDataIndividualDetailsModel(_jsonIndividualsDetails));
         }
 
         /// <summary>
@@ -146,7 +144,7 @@ namespace ExampleSetup.Controllers
             return rawJson;
         }
 
-        private static List<IndividualsSummary> PopulateData(string json)
+        private static List<IndividualsSummary> PopulateIndividualsSummaryModel(string json)
         {
             var parsedJson = JObject.Parse(json);
             List<IndividualsSummary> individuals = new List<IndividualsSummary>();
@@ -165,7 +163,7 @@ namespace ExampleSetup.Controllers
             return individuals;
         }
 
-        private static List<IndividualDetails> PopulateDataIndividualDetails(string json)
+        private static List<IndividualDetails> PopulateDataIndividualDetailsModel(string json)
         {
             dynamic parsedJson = JObject.Parse(json);
             string reference = parsedJson.Individual["Reference"];
