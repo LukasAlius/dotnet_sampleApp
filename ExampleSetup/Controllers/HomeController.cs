@@ -18,6 +18,8 @@ namespace ExampleSetup.Controllers
         private static string _jsonIndividualsSummary;
         private const string Reference = "5388f1dd436e46698007b79650679023";
 
+        private static string _authenticationToken;
+
         /// <summary>
         /// Presents a form for populating the credentials required to 
         /// establish a Direct ID API connection.
@@ -34,12 +36,11 @@ namespace ExampleSetup.Controllers
         [HttpPost]
         public async Task<ViewResult> Connect(CredentialsModel credentials)
         {
-            var userSessionToken = await AcquireUserSessionToken(
-                AcquireOAuthAccessToken(credentials),
-                new Uri(credentials.API));
+            _authenticationToken = AcquireOAuthAccessToken(credentials);
+            var userSessionToken = await AcquireUserSessionToken(_authenticationToken, new Uri(credentials.API));
 
-            _jsonIndividualsSummary = await getJson(credentials, IndividualSummaryUrl);
-            _jsonIndividualsDetails = await getJson(credentials, IndividualDetailsUrl + Reference);
+            _jsonIndividualsSummary = await getJson(/*credentials,*/ IndividualSummaryUrl);
+            //_jsonIndividualsDetails = await getJson(/*credentials,*/ IndividualDetailsUrl + Reference);
 
             return View("Widget", new WidgetModel(userSessionToken, credentials.FullCDNPath));
         }
@@ -55,8 +56,11 @@ namespace ExampleSetup.Controllers
         /// <summary>
         /// Load a Individuals Details page
         /// </summary>
-        public ActionResult IndividualDetails()
+        public async Task<ViewResult> IndividualDetails(string submitButton)
         {
+            //getJson(urlDetails + submitButton);
+            _jsonIndividualsDetails = await getJson(IndividualDetailsUrl + submitButton);
+
             return View(PopulateIndividualDetailsModel(_jsonIndividualsDetails));
         }
 
@@ -129,14 +133,14 @@ namespace ExampleSetup.Controllers
         /// <summary>
         /// Getting Json using authorization token
         /// </summary>
-        private async Task<string> getJson(CredentialsModel credentials, string url)
+        private async Task<string> getJson(/*CredentialsModel credentials,*/ string url)
         {
             // Getting authorization token
-            var authenticationToken = AcquireOAuthAccessToken(credentials);
+            //var authenticationToken = AcquireOAuthAccessToken(credentials);
 
             // Connecting using a authentication token (OAuthorization)
             var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authenticationToken);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authenticationToken);
             string rawJson = await httpClient.GetStringAsync(url);
 
             return rawJson;
