@@ -16,7 +16,6 @@ namespace ExampleSetup.Controllers
         private const string IndividualDetailsUrl = "https://api-beta.direct.id:444/v1/individual/";
         private static string _jsonIndividualsDetails;
         private static string _jsonIndividualsSummary;
-        private const string Reference = "5388f1dd436e46698007b79650679023";
 
         private static string _authenticationToken;
 
@@ -39,28 +38,24 @@ namespace ExampleSetup.Controllers
             _authenticationToken = AcquireOAuthAccessToken(credentials);
             var userSessionToken = await AcquireUserSessionToken(_authenticationToken, new Uri(credentials.API));
 
-            _jsonIndividualsSummary = await getJson(/*credentials,*/ IndividualSummaryUrl);
-            //_jsonIndividualsDetails = await getJson(/*credentials,*/ IndividualDetailsUrl + Reference);
-
             return View("Widget", new WidgetModel(userSessionToken, credentials.FullCDNPath));
         }
 
         /// <summary>
         /// Load a Individuals Summary page
         /// </summary>
-        public ActionResult IndividualsSummary()
+        public async Task<ViewResult> IndividualsSummary()
         {
+            _jsonIndividualsSummary = await getJson(IndividualSummaryUrl);
             return View(PopulateIndividualsSummaryModel(_jsonIndividualsSummary));
         }
 
         /// <summary>
         /// Load a Individuals Details page
         /// </summary>
-        public async Task<ViewResult> IndividualDetails(string submitButton)
+        public async Task<ViewResult> IndividualDetails(string reference)
         {
-            //getJson(urlDetails + submitButton);
-            _jsonIndividualsDetails = await getJson(IndividualDetailsUrl + submitButton);
-
+            _jsonIndividualsDetails = await getJson(IndividualDetailsUrl + reference);
             return View(PopulateIndividualDetailsModel(_jsonIndividualsDetails));
         }
 
@@ -133,11 +128,8 @@ namespace ExampleSetup.Controllers
         /// <summary>
         /// Getting Json using authorization token
         /// </summary>
-        private async Task<string> getJson(/*CredentialsModel credentials,*/ string url)
+        private async Task<string> getJson(string url)
         {
-            // Getting authorization token
-            //var authenticationToken = AcquireOAuthAccessToken(credentials);
-
             // Connecting using a authentication token (OAuthorization)
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authenticationToken);
@@ -165,7 +157,7 @@ namespace ExampleSetup.Controllers
             return individuals;
         }
 
-        private static List<IndividualDetails> PopulateIndividualDetailsModel(string json)
+        private static /*List<*/IndividualDetails/*>*/ PopulateIndividualDetailsModel(string json)
         {
             dynamic parsedJson = JObject.Parse(json);
             string reference = parsedJson.Individual["Reference"];
@@ -178,8 +170,8 @@ namespace ExampleSetup.Controllers
 
             GetAccounts(accountsJson, accounts);
 
-            individual.Add(new IndividualDetails(reference, provider, accounts));
-            return individual;
+            /*individual.Add();*/
+            return new IndividualDetails(reference, provider, accounts);
         }
 
         private static void GetAccounts(dynamic accountsJson, List<AccountDetails> accounts)
