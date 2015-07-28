@@ -14,8 +14,6 @@ namespace ExampleSetup.Controllers
     {
         private const string IndividualSummaryUrl ="https://api-beta.direct.id:444/v1/individuals";
         private const string IndividualDetailsUrl = "https://api-beta.direct.id:444/v1/individual/";
-        private static string _jsonIndividualsDetails;
-        private static string _jsonIndividualsSummary;
 
         private static string _authenticationToken;
 
@@ -46,8 +44,7 @@ namespace ExampleSetup.Controllers
         /// </summary>
         public async Task<ViewResult> IndividualsSummary()
         {
-            _jsonIndividualsSummary = await getJson(IndividualSummaryUrl);
-            return View(PopulateIndividualsSummaryModel(_jsonIndividualsSummary));
+            return View(PopulateIndividualsSummaryModel(await getJson(IndividualSummaryUrl)));
         }
 
         /// <summary>
@@ -55,8 +52,7 @@ namespace ExampleSetup.Controllers
         /// </summary>
         public async Task<ViewResult> IndividualDetails(string reference)
         {
-            _jsonIndividualsDetails = await getJson(IndividualDetailsUrl + reference);
-            return View(PopulateIndividualDetailsModel(_jsonIndividualsDetails));
+            return View(PopulateIndividualDetailsModel(await getJson(IndividualDetailsUrl + reference)));
         }
 
         /// <summary>
@@ -157,7 +153,7 @@ namespace ExampleSetup.Controllers
             return individuals;
         }
 
-        private static /*List<*/IndividualDetails/*>*/ PopulateIndividualDetailsModel(string json)
+        private static IndividualDetails PopulateIndividualDetailsModel(string json)
         {
             dynamic parsedJson = JObject.Parse(json);
             string reference = parsedJson.Individual["Reference"];
@@ -170,7 +166,6 @@ namespace ExampleSetup.Controllers
 
             GetAccounts(accountsJson, accounts);
 
-            /*individual.Add();*/
             return new IndividualDetails(reference, provider, accounts);
         }
 
