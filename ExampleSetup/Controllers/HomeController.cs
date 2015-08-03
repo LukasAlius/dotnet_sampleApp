@@ -1,6 +1,9 @@
 ﻿using ExampleSetup.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -55,6 +58,14 @@ namespace ExampleSetup.Controllers
             return View(PopulateIndividualDetailsModel(await getJson(IndividualDetailsUrl + reference)));
         }
 
+        [HttpPost]
+        public async Task<ActionResult> WebHook()
+        {
+            string userId = Request["didref"];
+
+            return new HttpStatusCodeResult(HttpStatusCode.OK);
+        }
+
         /// <summary>
         /// Obtains an OAuth access token which can then be used to make authorized calls
         /// to the Direct ID API.
@@ -94,7 +105,7 @@ namespace ExampleSetup.Controllers
             credentials.ClientID = credentials.ClientID.Trim();
             credentials.ResourceID = credentials.ResourceID.Trim();
             credentials.SecretKey = credentials.SecretKey.Trim();
-            credentials.FullCDNPath = credentials.FullCDNPath.Trim();
+            credentials.FullCDNPath = credentials.FullCDNPath.Trim(new Char[] { ' ', '/' });
         }
 
         /// <summary>
